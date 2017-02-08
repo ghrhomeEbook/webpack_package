@@ -159,7 +159,7 @@ module.exports = {
 
 ![](./chunk.png)
 
-其中asset部分就是生产的文件的文件名，是name+chunkhash的格式;chunks就是对生成的文件的数字标注;chunkName就是我们在webpack配置中指定;
+其中asset部分就是生产的文件的文件名，是name+chunkhash的格式;chunks就是对生成的文件的数字标注(chunkid);chunkName就是我们在webpack配置中指定;
 
 ![](./hash.png)
 
@@ -305,7 +305,7 @@ entry: {
 /******/ });
 ```
 
-（1）webpackJsonp第一个参数是chunkId，但是我们的CommonChunkPlugin抽取出来的部分是作为modules参数传入的，而且是一个`引用`，所以每次加载一个chunk的时候,他们引用的都是同一个
+（1）webpackJsonp第一个参数是chunkId，但是我们的CommonChunkPlugin抽取出来的部分是作为modules参数传入的(在webpack中每一个文件都是一个chunk,所以这个common.js也有自己的chunkid)，而且是一个`引用`，所以每次加载一个chunk的时候,他们引用的都是同一个(防止一个页面重复加载一个模块的代码，如多次加载jQuery)。
 
  (2)这里要看清楚什么是chunk，什么是module，在webpackJsonp这个函数中第一个参数就是chunkId对应于chunk，而而第二个参数就是chunk中被打包进去的多个module,这也是为什么下面的webpackJsonpCallback的函数签名是如下：
 
@@ -313,7 +313,7 @@ entry: {
  webpackJsonpCallback(chunkIds, moreModules)
  ```
 
-但是仔细想想，我们的common.js其实更像是一个module而不是chunk(因为他会被modules形参接受)。但是从控制台中的输出你可以知道其实webpack已经把它当做chunk了。我们common.js虽然没有在entry中配置，但是我们实际上在common.js中被当做自执行函数的参数传入最后放在modules中，以后再每一个chunk中require公有的这个文件的时候就直接require这个参数指定的内容就可以了
+但是仔细想想，我们的common.js其实更像是一个module而不是chunk(因为他会被modules形参接受)。但是从控制台中的输出你可以知道其实webpack已经把它当做chunk了(webpack中每一个文件都是一个chunk)。我们common.js虽然没有在entry中配置，但是我们实际上在common.js中被当做自执行函数的参数传入最后放在modules中，以后再每一个chunk中require公有的这个文件的时候就直接require这个参数指定的内容就可以了
 
  (3)modules得到的是一个chunk中所有的moreModules以及共有的commmon.js这个module（执行的时候只要运行moreModules[0]就可以了）。每次加载一个chunk，其modules最终都会包含我们的CommonChunkPlugin抽取出来的部分
 
