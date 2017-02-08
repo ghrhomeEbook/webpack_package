@@ -346,17 +346,14 @@ webpackJsonp([1],[
 ]);
 ```
 
-
-
-
 ##### 什么是moduleid?
 
-
-
-
-
-
-
+结合上面的chunkid应该不难理解
 
 
 ### 2.参考资料
+
+[webpack打包原理解析](https://github.com/yongningfu/webpack_package)
+
+
+
