@@ -1,22 +1,20 @@
-webpackJsonp([1],{
-
-/***/ 0:
+webpackJsonp([1],[
+/* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(8);
+	module.exports = __webpack_require__(4);
 
 
 /***/ },
-
-/***/ 8:
+/* 1 */,
+/* 2 */,
+/* 3 */,
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var util2 = __webpack_require__(3)
-	var css1 = __webpack_require__(4)
-
 	setTimeout(function() {console.log(util2.name), 2000})
 
 
 /***/ }
-
-});
+]);

@@ -6,8 +6,13 @@ var webpack = require('webpack')
 module.exports = {
 
 	entry: {
-	 	index: ['./src/js/entry.js'],   //配置两个入口
-		index2: ['./src/js/entry2.js']
+		/*多入口ID分配例子*/
+	 	index: ['./src/js1/entry.js'],   
+		index2: ['./src/js1/entry2.js']
+
+        /*单入口文件例子*/
+		// index: ['./src/js2/entry.js'],   
+		
 	},
 	output: {
 		path: path.resolve(__dirname, './dist/static'),
