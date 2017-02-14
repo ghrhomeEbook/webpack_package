@@ -315,7 +315,73 @@ entry: {
 
 但是仔细想想，我们的common.js其实更像是一个module而不是chunk(因为他会被modules形参接受)。但是从控制台中的输出你可以知道其实webpack已经把它当做chunk了(webpack中每一个文件都是一个chunk)。我们common.js虽然没有在entry中配置，但是我们实际上在common.js中被当做自执行函数的参数传入最后放在modules中，以后再每一个chunk中require公有的这个文件的时候就直接require这个参数指定的内容就可以了
 
- (3)modules得到的是一个chunk中所有的moreModules以及共有的commmon.js这个module（执行的时候只要运行moreModules[0]就可以了）。每次加载一个chunk，其modules最终都会包含我们的CommonChunkPlugin抽取出来的部分
+ (3)modules集合最终得到的是一个chunk中所有的moreModules（该chunk独有的module）以及共有的commmon.js这个module（执行的时候只要运行moreModules[0]就可以了）。每次加载一个chunk，其modules最终都会包含我们的CommonChunkPlugin抽取出来的部分。例如我们的[例子](https://github.com/liangklfangl/webpack-chunkfilename)，直接执行下面代码:
+
+```js
+webpack --profile --json > stats.json
+```
+
+然后在[visualizer](http://webpack.github.io/analyse/#chunks)中打开你就会看到如下的图形:
+
+![](./3.png)
+
+我们知道chunkId为0，1的模块父级chunk是'main'，而'main'的父级chunk是'vendor'，其实我这里关心的是打包后的代码，其如下:
+
+0.bundle.js(只是含有非公有代码部分)
+
+```js
+webpackJsonp([0,3],[
+/* 0 */,
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {})])
+
+"use strict";
+```
+
+其表示我们的0.bundle.js也会加载common.js
+
+1.bundle.js(只是含有非公有代码部分)
+
+```js
+webpackJsonp([1,3],[
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";})])
+
+```
+
+其表示我们的1.bundle.js也会加载common.js
+
+bundle.js(业务逻辑代码)
+
+```js
+webpackJsonp([2,3],{
+/***/ 2:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+//code splitting
+if (document.querySelectorAll('a').length) {
+    __webpack_require__.e/* require.ensure */(1).then((function () {
+        var Button = __webpack_require__(0).default;
+        var button = new Button('google.com');
+        button.render('a');
+    }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
+}
+
+if (document.querySelectorAll('h1').length) {
+    __webpack_require__.e/* require.ensure */(0).then((function () {
+        var Header = __webpack_require__(1).default;
+        new Header().render('h1');
+    }).bind(null, __webpack_require__)).catch(__webpack_require__.oe);
+}
+/***/ })
+
+},[2]);
+```
+
+其表示我们的bundle.js也会加载common.js,而这里webpackJsonp有三个参数，和上面的webpackJsonp作用具有本质差别。因此，当你加载这个main.js的时候，其并不是马上加载common.js，但是只有满足了这个条件后，加载了其他的chunk都会同时把common.js加载下来，这就达到了按需加载的目的!所以webpackJsonp函数第一个参数数组中的第二个元素后都是表示该chunk依赖的其他的chunk集合!
 
  （4）__webpack_require__方法最后返回的是modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);也就是执行了id为0的入口文件的exports后得到的对象，这就是这个模块的最后返回值
 
@@ -346,6 +412,8 @@ webpackJsonp([1],[
 ]);
 ```
 
+通过这里你因该会知道，在执行commonChunkPlugin之前是不存在我们的common.js的，而加上了common.js后，所有的chunk之间的关系都是要维护的!
+
 ##### 什么是moduleid?
 
 结合上面的chunkid应该不难理解
@@ -354,6 +422,4 @@ webpackJsonp([1],[
 ### 2.参考资料
 
 [webpack打包原理解析](https://github.com/yongningfu/webpack_package)
-
-
 
